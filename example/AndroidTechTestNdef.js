@@ -130,6 +130,7 @@ class App extends Component {
                 this.setState({tag, parsedText})
             })
             .then(() => NfcManager.writeNdefMessage(buildTextPayload(textToWrite)))
+            .then(() => NfcManager.makeReadOnly())
             .then(cleanUp)
             .catch(err => {
                 console.warn(err);
