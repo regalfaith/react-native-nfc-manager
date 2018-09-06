@@ -26,9 +26,9 @@ import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
 import android.nfc.Tag;
 import android.nfc.TagLostException;
-import android.nfc.tech.TagTechnology;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
+import android.nfc.tech.IsoDep;
 import android.nfc.tech.NdefFormatable;
 import android.os.Parcelable;
 
@@ -43,8 +43,6 @@ import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 
 import android.content.pm.PackageManager;
 
-// regalfaith edited
-
 class NfcManager extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener {
 	private static final String LOG_TAG = "ReactNativeNfcManager";
     private final List<IntentFilter> intentFilters = new ArrayList<IntentFilter>();
@@ -55,6 +53,8 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 	private Boolean isResumed = false;
 	private WriteNdefRequest writeNdefRequest = null;
 	private TagTechnologyRequest techRequest = null;
+	private String mTest = "";
+	private Boolean mResult = false;
 
 	class WriteNdefRequest {
 		NdefMessage message;
@@ -120,6 +120,28 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 	}
 
 	@ReactMethod
+	public void customFunc(String msg, Callback callback) {
+		synchronized(this) {
+			String result =  String.valueOf( ((IsoDep)(techRequest.getTechHandle())).isConnected() );
+			callback.invoke(null, result);
+		}
+	}
+
+	@ReactMethod
+	public void isConnected(Callback callback) {
+		synchronized(this) {
+			if (techRequest != null) {
+				Log.d(LOG_TAG, "isConnected invoked(techRequest is not null)");
+				callback.invoke(null, techRequest.isConnected());
+			}
+			else {
+				Log.d(LOG_TAG, "isConnected invoked(techRequest is null)");
+				callback.invoke(null, false);
+			}
+		}
+	}
+
+	@ReactMethod
 	public void closeTechnology(Callback callback) {
 		synchronized(this) {
 		    if (techRequest != null) {
@@ -129,25 +151,6 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		    } else {
 				// explicitly allow this
 				callback.invoke();
-			}
-		}
-	}
-
-	@ReactMethod
-	public void getTag(Callback callback) {
-		synchronized(this) {
-		    if (techRequest != null) {
-				try {
-				    TagTechnology tagTech = techRequest.getTechHandle();
-                    Tag tag = tagTech.getTag();
-				    WritableMap parsed = tag2React(tag);
-				    callback.invoke(null, parsed);
-				} catch (Exception ex) {
-					Log.d(LOG_TAG, "getTag fail");
-					callback.invoke("getTag fail");
-				}
-		    } else {
-				callback.invoke("no tech request available");
 			}
 		}
 	}
@@ -232,8 +235,8 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 				try {
 					String tech = techRequest.getTechType();
 				    byte[] bytes = rnArrayToBytes(rnArray);
-					if (tech.equals("NfcA")) {
-						NfcA techHandle = (NfcA)techRequest.getTechHandle();
+					if (tech.equals("IsoDep")) {
+						IsoDep techHandle = (IsoDep)techRequest.getTechHandle();
 				    	byte[] resultBytes = techHandle.transceive(bytes);
 						WritableArray resultRnArray = bytesToRnArray(resultBytes);
 				    	callback.invoke(null, resultRnArray);
@@ -417,7 +420,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		intentFilters.add(ndef);
 
 		// capture all rest NDEF, such as uri-based
-        intentFilters.add(new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED));
+    //intentFilters.add(new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED));
 		techLists.add(new String[]{Ndef.class.getName()});
 
 		// for those without NDEF, get them as tags
@@ -469,7 +472,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
         if (nfcAdapter != null && currentActivity != null && !currentActivity.isFinishing()) {
             try {
 				if (enable) {
-                    nfcAdapter.enableForegroundDispatch(currentActivity, getPendingIntent(), getIntentFilters(), getTechLists());
+                    nfcAdapter.enableForegroundDispatch(currentActivity, getPendingIntent(), getIntentFilters(), null);
 				} else {
 					nfcAdapter.disableForegroundDispatch(currentActivity);
 				}
@@ -555,13 +558,18 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 	@Override
 	public void onNewIntent(Intent intent) {
         Log.d(LOG_TAG, "onNewIntent " + intent);
-		WritableMap nfcTag = parseNfcIntent(intent);
-		if (nfcTag != null) {
-			sendEvent("NfcManagerDiscoverTag", nfcTag);
+		try {
+			WritableMap nfcTag = parseNfcIntent(intent);
+			if (nfcTag != null) {
+				sendEvent("NfcManagerDiscoverTag", nfcTag);
+			}
+		} catch(Exception e) {
+        Log.d(LOG_TAG, "onNewIntent error " + e.toString());
 		}
 	}
 
 	private WritableMap parseNfcIntent(Intent intent) {
+		Log.d(LOG_TAG, "parseNfcIntent invoked");
 		Log.d(LOG_TAG, "parseIntent " + intent);
 		String action = intent.getAction();
 		Log.d(LOG_TAG, "action " + action);
@@ -575,12 +583,13 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 
 		synchronized(this) {
 			if (writeNdefRequest != null) {
+				/*
 				writeNdef(
 					tag,
 					writeNdefRequest
 				);
 				writeNdefRequest = null;
-
+				*/
 				// explicitly return null, to avoid extra detection
 				return null;
 			} else if (techRequest != null) {
@@ -598,7 +607,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 				return null;
 			}
 		}
-
+/*
 		if (action.equals(NfcAdapter.ACTION_NDEF_DISCOVERED)) {
 			Ndef ndef = Ndef.get(tag);
 			Parcelable[] messages = intent.getParcelableArrayExtra((NfcAdapter.EXTRA_NDEF_MESSAGES));
@@ -619,6 +628,8 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		}
 
 		return parsed;
+		*/
+		return null;
 	}
 
 	private WritableMap tag2React(Tag tag) {
