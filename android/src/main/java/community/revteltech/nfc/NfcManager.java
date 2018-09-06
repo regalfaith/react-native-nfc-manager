@@ -43,6 +43,8 @@ import static com.facebook.react.bridge.UiThreadUtil.runOnUiThread;
 
 import android.content.pm.PackageManager;
 
+// regalfaith edited
+
 class NfcManager extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener {
 	private static final String LOG_TAG = "ReactNativeNfcManager";
     private final List<IntentFilter> intentFilters = new ArrayList<IntentFilter>();
@@ -83,7 +85,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 	}
 
 	private boolean hasPendingRequest() {
-		return writeNdefRequest != null || techRequest != null; 
+		return writeNdefRequest != null || techRequest != null;
 	}
 
 	@ReactMethod
@@ -274,7 +276,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		    } else {
 				boolean format = options.getBoolean("format");
 				boolean formatReadOnly = options.getBoolean("formatReadOnly");
-				
+
 		        try {
 					NdefMessage msgToWrite;
 
@@ -290,10 +292,10 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 
 		    		writeNdefRequest = new WriteNdefRequest(
 						msgToWrite,
-						callback, // defer the callback 
+						callback, // defer the callback
 						format,
 						formatReadOnly
-					); 
+					);
 		        } catch (FormatException e) {
 		        	callback.invoke("Incorrect ndef format");
 		        }
@@ -314,7 +316,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 					NdefMessage msgToPush = null;
 					if (rnArray != null) {
 						msgToPush = new NdefMessage(rnArrayToBytes(rnArray));
-					}	
+					}
 
 					NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
 					nfcAdapter.setNdefPushMessage(msgToPush, currentActivity);
@@ -349,7 +351,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 			callback.invoke("no nfc support");
 		}
 	}
-    
+
    	@ReactMethod
 	public void isSupported(Callback callback){
 		Log.d(LOG_TAG, "isSupported");
@@ -574,7 +576,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
 		synchronized(this) {
 			if (writeNdefRequest != null) {
 				writeNdef(
-					tag, 
+					tag,
 					writeNdefRequest
 				);
 				writeNdefRequest = null;
@@ -665,7 +667,7 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
     }
 
 	private void writeNdef(Tag tag, WriteNdefRequest request) {
-		NdefMessage message = request.message; 
+		NdefMessage message = request.message;
 		Callback callback = request.callback;
 		boolean formatReadOnly = request.formatReadOnly;
 		boolean format = request.format;
@@ -727,4 +729,3 @@ class NfcManager extends ReactContextBaseJavaModule implements ActivityEventList
         return value;
     }
 }
-
