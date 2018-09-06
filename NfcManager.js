@@ -18,6 +18,7 @@ const Events = {
 const NfcTech = {
   Ndef: 'Ndef',
   NfcA: 'NfcA',
+  IsoDep: 'IsoDep'
 }
 
 const LOG = 'NfcManagerJs';
@@ -74,6 +75,22 @@ class NfcManager {
 
     return new Promise((resolve, reject) => {
       NativeNfcManager.isEnabled((err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result)
+        }
+      })
+    })
+  }
+
+  isConnected() {
+    if (Platform.OS === 'ios') {
+      return Promise.reject('not implemented');
+    }
+
+    return new Promise((resolve, reject) => {
+      NativeNfcManager.isConnected((err, result) => {
         if (err) {
           reject(err);
         } else {
@@ -149,10 +166,6 @@ class NfcManager {
   }
 
   _handleSessionClosed = () => {
-    if (this._subscription) {
-        this._subscription.remove();
-        this._subscription = null;
-    }
     this._clientTagDiscoveryListener = null;
     this._clientSessionClosedListener && this._clientSessionClosedListener();
   }
@@ -182,7 +195,7 @@ class NfcManager {
   }
 
   // -------------------------------------
-  // Ndef Writing request API  
+  // Ndef Writing request API
   // -------------------------------------
   requestNdefWrite(bytes, {format=false, formatReadOnly=false}={}) {
     if (Platform.OS === 'ios') {
@@ -217,7 +230,7 @@ class NfcManager {
   }
 
   // -------------------------------------
-  // Nfc Tech request API  
+  // Nfc Tech request API
   // -------------------------------------
   requestTechnology(tech) {
     if (Platform.OS === 'ios') {
@@ -258,22 +271,6 @@ class NfcManager {
 
     return new Promise((resolve, reject) => {
       NativeNfcManager.closeTechnology((err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      })
-    })
-  }
-
-  getTag() {
-    if (Platform.OS === 'ios') {
-      return Promise.reject('not implemented');
-    }
-
-    return new Promise((resolve, reject) => {
-      NativeNfcManager.getTag((err, result) => {
         if (err) {
           reject(err);
         } else {
@@ -360,6 +357,22 @@ class NfcManager {
 
     return new Promise((resolve, reject) => {
       NativeNfcManager.transceive(bytes, (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      })
+    })
+  }
+
+  customFunc(msg) {
+    if (Platform.OS === 'ios') {
+      return Promise.reject('not implemented');
+    }
+
+    return new Promise((resolve, reject) => {
+      NativeNfcManager.customFunc(msg, (err, result) => {
         if (err) {
           reject(err);
         } else {
