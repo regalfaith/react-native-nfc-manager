@@ -35,7 +35,13 @@ class TagTechnologyRequest {
     }
 
     boolean isConnected() {
-        return mTag != null;
+      if (mTag == null)
+        return false;
+
+      if (mTech == null)
+        return false;
+
+      return mTech.isConnected();
     }
 
     boolean connect(Tag tag) {
