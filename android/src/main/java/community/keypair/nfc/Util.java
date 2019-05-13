@@ -1,4 +1,4 @@
-package community.revteltech.nfc;
+package community.keypair.nfc;
 
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
