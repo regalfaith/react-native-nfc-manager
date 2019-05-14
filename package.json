@@ -1,5 +1,5 @@
 {
-  "name": "@regalfaith/react-native-nfc-manager",
+  "name": "react-native-nfc-manager",
   "version": "0.5.5",
   "description": "A NFC module for react native.",
   "main": "NfcManager",
